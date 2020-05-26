@@ -1,16 +1,29 @@
 import React from 'react'
 import { View, TextInput, StyleSheet, TouchableOpacity, Text, Button } from 'react-native'
-import { withNavigation } from 'react-navigation';
-//import { useNavigation } from '@react-navigation/native';
+import Firebase from '../config/Firebase'
+import { bindActionCreators } from 'redux'
+import { connect } from 'react-redux'
+import { updateEmail, updatePassword, login, getUser } from '../actions/user'
 
 class Login extends React.Component {
-    state = {
+    /*state = {
         email: '',
         password: ''
     }
 
+    handleLogin = () => {
+        const { email, password } = this.state
+
+        Firebase.auth()
+            .signInWithEmailAndPassword(email, password)
+            .then(() => this.props.navigation.navigate('Profile'))
+            .catch(error => console.log(error))
+    }
+
     render() {
-        const navigate = this.props.navigation;
+        const { navigate } = this.props.navigation;
+        //console.log('debug', navigate);
+        //console.log('this.props.navigation', this.props.navigation);
         return (
             <View style={styles.container}>
                 <TextInput
@@ -28,13 +41,57 @@ class Login extends React.Component {
                     secureTextEntry={true}
                 />
                 <TouchableOpacity 
-                    style={styles.button}>
+                    style={styles.button}
+                    onPress={this.handleLogin}>
                     <Text style={styles.buttonText}>Login</Text>
                 </TouchableOpacity>
                 <Button 
                 title="Don't have an account yet? Sign up"
                 onPress={() => navigate('Signup')} />
-                {/* onPress={() => this.props.navigation.navigate('Signup')} /> */}
+                //onPress={() => this.props.navigation.navigate('Signup')} />
+            </View>
+        )
+    }*/
+    /*handleLogin = () => {
+        this.props.login()
+        this.props.navigation.navigate('Profile')
+    }*/
+
+    componentDidMount = () => {
+        Firebase.auth().onAuthStateChanged(user => {
+            if (user) {
+                this.props.getUser(user.uid)
+                if (this.props.user != null) {
+                    this.props.navigation.navigate('Profile')
+                }
+            }
+        })
+    }
+
+    render() {
+        return (
+            <View style={styles.container}>
+                <TextInput
+                    style={styles.inputBox}
+                    value={this.props.user.email}
+                    onChangeText={email => this.props.updateEmail(email)}
+                    placeholder='Email'
+                    autoCapitalize='none'
+                />
+                <TextInput
+                    style={styles.inputBox}
+                    value={this.props.user.password}
+                    onChangeText={password => this.props.updatePassword(password)}
+                    placeholder='Password'
+                    secureTextEntry={true}
+                />
+                <TouchableOpacity style={styles.button} onPress={() => this.props.login()}>
+                    <Text style={styles.buttonText}>Login</Text>
+                </TouchableOpacity>
+                <Button
+                    title="Don't have an account yet? Sign up"
+                    onPress={() => this.props.navigation.navigate('Signup')}
+                />
             </View>
         )
     }
@@ -77,5 +134,17 @@ const styles = StyleSheet.create({
     }
 })
 
-export default Login;
-//export default withNavigation(Login);
+const mapDispatchToProps = dispatch => {
+    return bindActionCreators({ updateEmail, updatePassword, login, getUser }, dispatch)
+}
+
+const mapStateToProps = state => {
+    return {
+        user: state.user
+    }
+}
+
+export default connect(
+    mapStateToProps,
+    mapDispatchToProps
+)(Login)

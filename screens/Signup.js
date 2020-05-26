@@ -1,18 +1,18 @@
 import React from 'react'
 import { View, TextInput, StyleSheet, TouchableOpacity, Text } from 'react-native'
-//import { useNavigation } from '@react-navigation/native';
-import { withNavigation } from 'react-navigation';
-import Firebase from '../config/Firebase'
+//import Firebase from '../config/Firebase'
+import { bindActionCreators } from 'redux'
+import { connect } from 'react-redux'
+import { updateEmail, updatePassword, signup } from '../actions/user'
 
 class Signup extends React.Component {
-    state = {
+    /*state = {
         name: '',
         email: '',
         password: ''
     }
 
     handleSignUp = () => {
-        //const navigation = useNavigation();
         const { email, password } = this.state
         Firebase.auth()
             .createUserWithEmailAndPassword(email, password)
@@ -40,6 +40,34 @@ class Signup extends React.Component {
                     style={styles.inputBox}
                     value={this.state.password}
                     onChangeText={password => this.setState({ password })}
+                    placeholder='Password'
+                    secureTextEntry={true}
+                />
+                <TouchableOpacity style={styles.button} onPress={this.handleSignUp}>
+                    <Text style={styles.buttonText}>Signup</Text>
+                </TouchableOpacity>
+            </View>
+        )
+    }*/
+    handleSignUp = () => {
+        this.props.signup()
+        this.props.navigation.navigate('Profile')
+    }
+
+    render() {
+        return (
+            <View style={styles.container}>
+                <TextInput
+                    style={styles.inputBox}
+                    value={this.props.user.email}
+                    onChangeText={email => this.props.updateEmail(email)}
+                    placeholder='Email'
+                    autoCapitalize='none'
+                />
+                <TextInput
+                    style={styles.inputBox}
+                    value={this.props.user.password}
+                    onChangeText={password => this.props.updatePassword(password)}
                     placeholder='Password'
                     secureTextEntry={true}
                 />
@@ -88,5 +116,17 @@ const styles = StyleSheet.create({
     }
 })
 
-export default Signup;
-//export default withNavigation(Signup);
+const mapDispatchToProps = dispatch => {
+    return bindActionCreators({ updateEmail, updatePassword, signup }, dispatch)
+}
+
+const mapStateToProps = state => {
+    return {
+        user: state.user
+    }
+}
+
+export default connect(
+    mapStateToProps,
+    mapDispatchToProps
+)(Signup)
